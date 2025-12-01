@@ -11,10 +11,23 @@ function App() {
 
   const [addedProducts, setAddeddProducts] = useState([])
 
+  const updateQuantity = (name, quantity) => {
+    setAddeddProducts(curr => curr.map((p) => {
+      if (p.name === name) {
+        return {
+          ...p,
+          quantity
+        }
+      }
+      return p;
+    }))
+  }
+
   const addToCart = product => {
-    const isProductAdded = addedProducts.some(p => p.name === product.name);
-    if (isProductAdded) {
-      return
+    const productAdded = addedProducts.find(p => p.name === product.name);
+    if (productAdded) {
+      updateQuantity(productAdded.name, productAdded.quantity + 1)
+      return;
     }
 
     setAddeddProducts(curr => [...curr, {
@@ -22,6 +35,12 @@ function App() {
       quantity: 1
     }])
   }
+
+  const removeFromCart = product => {
+    setAddeddProducts(curr => curr.filter(p => p.name !== product.name))
+  }
+
+  const totalToPay = addedProducts.reduce((acc, p) => acc + (p.price * p.quantity), 0)
 
   return (
     <>
@@ -44,12 +63,18 @@ function App() {
           <ul>
             {addedProducts.map((product, i) => {
               return (
-                <li key={i}>
-                  <p>{product.name + " " + (product.price.toFixed(2)) + "€ x" + product.quantity}</p>
-                </li>
+                <>
+                  <li key={i}>
+                    <p>{product.name + " " + (product.price.toFixed(2)) + "€ x" + product.quantity}</p>
+                    <button onClick={() => { removeFromCart(product) }}>Rimuovi dal carrello</button>
+                  </li>
+                  <span><strong>Totale {product.name}:</strong> €{(product.price * product.quantity).toFixed(2)}</span>
+                </>
+
               )
             })}
           </ul>
+          <h2>Totale da pagare: €{totalToPay.toFixed(2)}</h2>
         </>
       )}
     </>
